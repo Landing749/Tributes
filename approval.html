@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Message Approval — Ma'am Cha Tribute</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #3b82f6;
+      --blue-dim:  #1d4ed8;
+      --cyan:      #67e8f9;
+      --navy:      #0a0f1e;
+      --navy-mid:  #0f172a;
+      --navy-card: #111827;
+      --navy-rim:  #1e293b;
+      --white:     #f8fafc;
+      --muted:     #94a3b8;
+      --glow:      rgba(59,130,246,.35);
+      --glow-c:    rgba(103,232,249,.25);
+      --success:   #34d399;
+      --error:     #f87171;
+      --warning:   #fbbf24;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ── BG CANVAS ── */
+    #bg-canvas {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; opacity: .07; z-index: 0;
+    }
+
+    /* ── CURSOR ── */
+    .cursor { position:fixed; pointer-events:none; z-index:9999; width:10px; height:10px; border-radius:50%; background:var(--cyan); mix-blend-mode:screen; transform:translate(-50%,-50%); transition:transform .1s; }
+    .cursor-ring { position:fixed; pointer-events:none; z-index:9998; width:34px; height:34px; border-radius:50%; border:1.5px solid rgba(103,232,249,.5); transform:translate(-50%,-50%); transition:transform .25s cubic-bezier(.23,1,.32,1); }
+
+    /* ── NAV ── */
+    nav {
+      position: relative; z-index: 10;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.3rem 2.5rem;
+      border-bottom: 1px solid rgba(59,130,246,.1);
+      background: rgba(10,15,30,.85);
+      backdrop-filter: blur(18px);
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; color: var(--cyan); letter-spacing: .08em;
+      text-decoration: none;
+    }
+    .nav-back {
+      display: flex; align-items: center; gap: .5rem;
+      color: var(--muted); text-decoration: none;
+      font-size: .82rem; letter-spacing: .06em; text-transform: uppercase;
+      transition: color .3s;
+    }
+    .nav-back:hover { color: var(--white); }
+    .nav-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .3rem .8rem; border-radius: 50px;
+      background: rgba(251,191,36,.1);
+      border: 1px solid rgba(251,191,36,.25);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem; color: var(--warning); letter-spacing: .06em;
+    }
+
+    /* ── LOGIN GATE ── */
+    #login-gate {
+      position: fixed; inset: 0; z-index: 200;
+      background: var(--navy);
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+    .login-card {
+      width: 100%; max-width: 400px;
+      background: var(--navy-card);
+      border: 1px solid rgba(59,130,246,.18);
+      border-radius: 24px;
+      padding: 2.8rem 2.4rem;
+      box-shadow: 0 40px 100px rgba(0,0,0,.5), 0 0 50px rgba(59,130,246,.08);
+      position: relative; overflow: hidden;
+      animation: slideUp .7s cubic-bezier(.23,1,.32,1) both;
+    }
+    .login-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(to right, var(--blue-dim), var(--cyan), var(--blue));
+    }
+    .login-icon { font-size: 2rem; margin-bottom: 1.2rem; display: block; }
+    .login-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.9rem; font-weight: 300; margin-bottom: .4rem;
+    }
+    .login-sub { color: var(--muted); font-size: .88rem; line-height: 1.6; margin-bottom: 2rem; }
+
+    .login-field { margin-bottom: 1.2rem; }
+    .login-field label {
+      display: block; margin-bottom: .45rem;
+      font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+    }
+    .login-field input {
+      width: 100%;
+      background: rgba(15,23,42,.8);
+      border: 1px solid rgba(59,130,246,.2);
+      border-radius: 12px;
+      padding: .85rem 1rem;
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .3s, box-shadow .3s;
+    }
+    .login-field input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    }
+
+    .login-btn {
+      width: 100%; padding: .95rem;
+      border: none; border-radius: 12px; cursor: pointer;
+      background: linear-gradient(135deg, var(--blue), var(--blue-dim));
+      color: #fff; font-family: 'DM Sans', sans-serif;
+      font-size: .95rem; font-weight: 500; letter-spacing: .04em;
+      box-shadow: 0 0 28px var(--glow);
+      transition: box-shadow .3s, transform .25s;
+    }
+    .login-btn:hover {
+      box-shadow: 0 0 48px rgba(59,130,246,.55);
+      transform: translateY(-2px);
+    }
+    .login-error {
+      margin-top: 1rem; padding: .75rem 1rem;
+      border-radius: 10px; font-size: .84rem;
+      background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3);
+      color: var(--error); display: none;
+    }
+
+    /* ── MAIN ── */
+    main {
+      position: relative; z-index: 1;
+      flex: 1;
+      padding: 3rem 2rem 6rem;
+      max-width: 1100px; width: 100%; margin: 0 auto;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 3rem;
+      animation: slideUp .7s cubic-bezier(.23,1,.32,1) both;
+    }
+    .page-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--cyan); margin-bottom: .8rem;
+    }
+    .page-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; line-height: 1.2;
+      margin-bottom: .6rem;
+    }
+    .page-desc { color: var(--muted); font-size: .9rem; line-height: 1.7; }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      display: flex; flex-wrap: wrap; gap: 1rem;
+      margin-bottom: 2.5rem;
+      animation: slideUp .7s .1s cubic-bezier(.23,1,.32,1) both;
+    }
+    .stat-pill {
+      display: inline-flex; align-items: center; gap: .55rem;
+      padding: .55rem 1.1rem; border-radius: 50px;
+      font-size: .8rem; font-family: 'JetBrains Mono', monospace;
+      letter-spacing: .04em;
+    }
+    .stat-pill.pending {
+      border: 1px solid rgba(251,191,36,.25);
+      background: rgba(251,191,36,.08);
+      color: var(--warning);
+    }
+    .stat-pill.approved {
+      border: 1px solid rgba(52,211,153,.25);
+      background: rgba(52,211,153,.08);
+      color: var(--success);
+    }
+    .stat-pill.rejected {
+      border: 1px solid rgba(248,113,113,.2);
+      background: rgba(248,113,113,.06);
+      color: var(--error);
+    }
+    .stat-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex; gap: .5rem; margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      padding-bottom: 0;
+      animation: slideUp .7s .15s cubic-bezier(.23,1,.32,1) both;
+    }
+    .tab-btn {
+      padding: .65rem 1.4rem;
+      border: none; background: none; cursor: pointer;
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: .88rem; font-weight: 400; letter-spacing: .04em;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color .3s, border-color .3s;
+    }
+    .tab-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+    .tab-btn:hover:not(.active) { color: var(--white); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center; padding: 5rem 2rem;
+      color: var(--muted);
+    }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; display: block; opacity: .5; }
+    .empty-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem; font-weight: 300; margin-bottom: .5rem;
+      color: var(--white);
+    }
+    .empty-desc { font-size: .88rem; }
+
+    /* ── MESSAGE GRID ── */
+    .msg-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.4rem;
+    }
+
+    /* ── PENDING CARD ── */
+    .pending-card {
+      background: var(--navy-card);
+      border: 1px solid rgba(251,191,36,.15);
+      border-radius: 20px; padding: 1.6rem;
+      display: flex; flex-direction: column; gap: 1rem;
+      position: relative; overflow: hidden;
+      animation: cardIn .5s ease both;
+      transition: transform .3s, box-shadow .3s;
+    }
+    .pending-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(to right, var(--warning), transparent);
+    }
+    .pending-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0,0,0,.45), 0 0 24px rgba(251,191,36,.08);
+    }
+
+    /* ── APPROVED CARD ── */
+    .approved-card {
+      background: var(--navy-card);
+      border: 1px solid rgba(52,211,153,.12);
+      border-radius: 20px; padding: 1.6rem;
+      display: flex; flex-direction: column; gap: 1rem;
+      position: relative; overflow: hidden;
+      animation: cardIn .5s ease both;
+      transition: transform .3s, box-shadow .3s;
+      opacity: .85;
+    }
+    .approved-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(to right, var(--success), transparent);
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card header */
+    .card-top {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
+    }
+    .card-meta {}
+    .card-name {
+      font-size: .9rem; font-weight: 500;
+      color: var(--cyan); letter-spacing: .03em;
+      margin-bottom: .2rem;
+    }
+    .card-date {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .65rem; color: var(--muted);
+    }
+    .card-status {
+      font-size: .68rem; letter-spacing: .07em; text-transform: uppercase;
+      padding: .3rem .7rem; border-radius: 50px;
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+    }
+    .status-pending {
+      background: rgba(251,191,36,.12);
+      border: 1px solid rgba(251,191,36,.25);
+      color: var(--warning);
+    }
+    .status-approved {
+      background: rgba(52,211,153,.1);
+      border: 1px solid rgba(52,211,153,.25);
+      color: var(--success);
+    }
+
+    /* Message body */
+    .card-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.8rem; line-height: .6;
+      color: var(--blue); opacity: .2;
+    }
+    .card-message {
+      font-size: .9rem; line-height: 1.75; color: rgba(248,250,252,.82);
+      font-style: italic; flex: 1;
+    }
+
+    /* Actions */
+    .card-actions {
+      display: flex; gap: .7rem; flex-wrap: wrap;
+    }
+    .btn-approve, .btn-reject, .btn-remove {
+      flex: 1; min-width: 80px;
+      padding: .65rem .8rem;
+      border: none; border-radius: 10px;
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+      font-size: .82rem; font-weight: 500; letter-spacing: .03em;
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+      transition: transform .2s, box-shadow .2s, opacity .2s;
+    }
+    .btn-approve {
+      background: linear-gradient(135deg, #059669, #047857);
+      color: #fff;
+      box-shadow: 0 0 18px rgba(5,150,105,.3);
+    }
+    .btn-approve:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(5,150,105,.5);
+    }
+    .btn-reject {
+      background: rgba(248,113,113,.12);
+      border: 1px solid rgba(248,113,113,.25);
+      color: var(--error);
+    }
+    .btn-reject:hover {
+      background: rgba(248,113,113,.22);
+      transform: translateY(-2px);
+    }
+    .btn-remove {
+      background: rgba(248,113,113,.1);
+      border: 1px solid rgba(248,113,113,.2);
+      color: var(--error);
+    }
+    .btn-remove:hover {
+      background: rgba(248,113,113,.2);
+      transform: translateY(-2px);
+    }
+    .btn-approve:disabled, .btn-reject:disabled, .btn-remove:disabled {
+      opacity: .45; cursor: not-allowed; transform: none;
+    }
+
+    /* ── TOAST ── */
+    #toast-container {
+      position: fixed; bottom: 2rem; right: 2rem;
+      display: flex; flex-direction: column; gap: .7rem;
+      z-index: 500;
+    }
+    .toast {
+      padding: .85rem 1.2rem;
+      border-radius: 12px; font-size: .85rem;
+      display: flex; align-items: center; gap: .7rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,.4);
+      animation: toastIn .35s cubic-bezier(.23,1,.32,1) both;
+      max-width: 300px;
+    }
+    .toast.success {
+      background: rgba(52,211,153,.15);
+      border: 1px solid rgba(52,211,153,.3);
+      color: var(--success);
+    }
+    .toast.error {
+      background: rgba(248,113,113,.12);
+      border: 1px solid rgba(248,113,113,.3);
+      color: var(--error);
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(30px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── LOADING ── */
+    .loading-state {
+      display: flex; align-items: center; justify-content: center;
+      padding: 4rem; gap: 1rem; color: var(--muted); font-size: .9rem;
+    }
+    .spinner {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid rgba(103,232,249,.2);
+      border-top-color: var(--cyan);
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      background: var(--navy-mid);
+      border-top: 1px solid rgba(59,130,246,.08);
+      text-align: center; padding: 1.6rem 2rem;
+      font-size: .74rem; color: var(--muted); letter-spacing: .05em;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 640px) {
+      nav { padding: 1rem 1.4rem; }
+      main { padding: 2rem 1.2rem 5rem; }
+      .msg-grid { grid-template-columns: 1fr; }
+      .tabs { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <!-- Background canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- ── LOGIN GATE ── -->
+  <div id="login-gate">
+    <div class="login-card">
+      <span class="login-icon">🔐</span>
+      <h1 class="login-title">Admin Access</h1>
+      <p class="login-sub">Enter the admin password to manage and approve student messages.</p>
+      <div class="login-field">
+        <label>Password</label>
+        <input type="password" id="admin-password" placeholder="••••••••" autocomplete="off"/>
+      </div>
+      <button class="login-btn" onclick="checkPassword()">Enter Dashboard</button>
+      <div class="login-error" id="login-error">Incorrect password. Please try again.</div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <nav>
+    <span class="nav-logo">Ma'am Cha — Admin</span>
+    <div style="display:flex;align-items:center;gap:1.2rem;">
+      <span class="nav-badge" id="pending-badge">⏳ <span id="badge-count">0</span> Pending</span>
+      <a href="index.html" class="nav-back">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Site
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main>
+    <div class="page-header">
+      <p class="page-eyebrow">Admin · Message Moderation</p>
+      <h1 class="page-title">Message Approval</h1>
+      <p class="page-desc">Review and approve messages submitted by students before they appear on the tribute wall.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      <span class="stat-pill pending"><span class="stat-dot"></span> <span id="stat-pending">0</span> Pending</span>
+      <span class="stat-pill approved"><span class="stat-dot"></span> <span id="stat-approved">0</span> Approved</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('pending', this)">⏳ Pending Review</button>
+      <button class="tab-btn" onclick="switchTab('approved', this)">✅ Approved</button>
+    </div>
+
+    <!-- Pending Tab -->
+    <div id="tab-pending">
+      <div id="pending-loading" class="loading-state">
+        <div class="spinner"></div> Loading pending messages…
+      </div>
+      <div class="msg-grid" id="pending-grid" style="display:none;"></div>
+      <div class="empty-state" id="pending-empty" style="display:none;">
+        <span class="empty-icon">🎉</span>
+        <h2 class="empty-title">All caught up!</h2>
+        <p class="empty-desc">No messages waiting for review right now.</p>
+      </div>
+    </div>
+
+    <!-- Approved Tab -->
+    <div id="tab-approved" style="display:none;">
+      <div id="approved-loading" class="loading-state">
+        <div class="spinner"></div> Loading approved messages…
+      </div>
+      <div class="msg-grid" id="approved-grid" style="display:none;"></div>
+      <div class="empty-state" id="approved-empty" style="display:none;">
+        <span class="empty-icon">💭</span>
+        <h2 class="empty-title">Nothing approved yet</h2>
+        <p class="empty-desc">Approved messages will appear here and on the tribute wall.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <footer>Ma'am Cha Tribute — Admin Panel &nbsp;·&nbsp; Grade 7 Matapat 💙</footer>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getDatabase, ref, onValue, remove, set, push, get } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAYpXaL6oNhuX3LWAinx7LmhrAozfVzCvk",
+      authDomain: "dr-de-roda-lr-portal.firebaseapp.com",
+      databaseURL: "https://dr-de-roda-lr-portal-default-rtdb.firebaseio.com",
+      projectId: "dr-de-roda-lr-portal",
+      storageBucket: "dr-de-roda-lr-portal.firebasestorage.app",
+      messagingSenderId: "1074205661200",
+      appId: "1:1074205661200:web:f42d20c85f8600728cd295"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getDatabase(app);
+
+    function escHtml(s) {
+      return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    function formatDate(ts) {
+      if (!ts) return "";
+      return new Date(ts).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+
+    // ── PENDING MESSAGES ──
+    onValue(ref(db, "/pending_messages"), (snap) => {
+      const data = snap.val();
+      const loading = document.getElementById("pending-loading");
+      const grid    = document.getElementById("pending-grid");
+      const empty   = document.getElementById("pending-empty");
+      const badge   = document.getElementById("badge-count");
+      const statEl  = document.getElementById("stat-pending");
+
+      loading.style.display = "none";
+
+      if (!data) {
+        const count = 0;
+        badge.textContent = count;
+        statEl.textContent = count;
+        grid.style.display = "none";
+        empty.style.display = "block";
+        return;
+      }
+
+      const entries = Object.entries(data);
+      badge.textContent = entries.length;
+      statEl.textContent = entries.length;
+
+      grid.innerHTML = "";
+      grid.style.display = "grid";
+      empty.style.display = "none";
+
+      entries
+        .sort((a, b) => (a[1].timestamp || 0) - (b[1].timestamp || 0))
+        .forEach(([key, entry], i) => {
+          const card = document.createElement("div");
+          card.className = "pending-card";
+          card.style.animationDelay = `${i * 60}ms`;
+          card.id = `pcard-${key}`;
+          card.innerHTML = `
+            <div class="card-top">
+              <div class="card-meta">
+                <div class="card-name">${escHtml(entry.name || "Anonymous")}</div>
+                <div class="card-date">${formatDate(entry.timestamp)}</div>
+              </div>
+              <span class="card-status status-pending">Pending</span>
+            </div>
+            <div>
+              <span class="card-quote">"</span>
+              <p class="card-message">${escHtml(entry.message || entry.text || "")}</p>
+            </div>
+            <div class="card-actions">
+              <button class="btn-approve" id="approve-${key}" onclick="approveMsg('${key}')">
+                ✓ Approve
+              </button>
+              <button class="btn-reject" id="reject-${key}" onclick="rejectMsg('${key}')">
+                ✕ Reject
+              </button>
+            </div>`;
+          grid.appendChild(card);
+        });
+    });
+
+    // ── APPROVED MESSAGES ──
+    onValue(ref(db, "/approved_messages"), (snap) => {
+      const data = snap.val();
+      const loading = document.getElementById("approved-loading");
+      const grid    = document.getElementById("approved-grid");
+      const empty   = document.getElementById("approved-empty");
+      const statEl  = document.getElementById("stat-approved");
+
+      loading.style.display = "none";
+
+      if (!data) {
+        statEl.textContent = 0;
+        grid.style.display = "none";
+        empty.style.display = "block";
+        return;
+      }
+
+      const entries = Object.entries(data);
+      statEl.textContent = entries.length;
+
+      grid.innerHTML = "";
+      grid.style.display = "grid";
+      empty.style.display = "none";
+
+      entries
+        .sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0))
+        .forEach(([key, entry], i) => {
+          const card = document.createElement("div");
+          card.className = "approved-card";
+          card.style.animationDelay = `${i * 60}ms`;
+          card.innerHTML = `
+            <div class="card-top">
+              <div class="card-meta">
+                <div class="card-name">${escHtml(entry.name || "Anonymous")}</div>
+                <div class="card-date">${formatDate(entry.timestamp)}</div>
+              </div>
+              <span class="card-status status-approved">✓ Live</span>
+            </div>
+            <div>
+              <span class="card-quote">"</span>
+              <p class="card-message">${escHtml(entry.message || entry.text || "")}</p>
+            </div>
+            <div class="card-actions">
+              <button class="btn-remove" onclick="removeApproved('${key}')">
+                ✕ Remove from Wall
+              </button>
+            </div>`;
+          grid.appendChild(card);
+        });
+    });
+
+    // ── APPROVE ──
+    window.approveMsg = async function(key) {
+      const approveBtn = document.getElementById(`approve-${key}`);
+      const rejectBtn  = document.getElementById(`reject-${key}`);
+      if (approveBtn) { approveBtn.disabled = true; approveBtn.textContent = "Approving…"; }
+      if (rejectBtn)  { rejectBtn.disabled = true; }
+
+      try {
+        const snap = await get(ref(db, `/pending_messages/${key}`));
+        if (!snap.exists()) { showToast("Message no longer exists.", "error"); return; }
+        const entry = snap.val();
+
+        // Copy to approved
+        await push(ref(db, "/approved_messages"), {
+          name:      entry.name || "Anonymous",
+          message:   entry.message || entry.text || "",
+          timestamp: entry.timestamp || Date.now(),
+          approved:  true
+        });
+
+        // Delete from pending
+        await remove(ref(db, `/pending_messages/${key}`));
+
+        showToast("Message approved and published! 💙", "success");
+      } catch (err) {
+        console.error(err);
+        showToast("Something went wrong. Please try again.", "error");
+        if (approveBtn) { approveBtn.disabled = false; approveBtn.textContent = "✓ Approve"; }
+        if (rejectBtn)  { rejectBtn.disabled = false; }
+      }
+    };
+
+    // ── REJECT ──
+    window.rejectMsg = async function(key) {
+      if (!confirm("Are you sure you want to reject and delete this message? This cannot be undone.")) return;
+
+      const approveBtn = document.getElementById(`approve-${key}`);
+      const rejectBtn  = document.getElementById(`reject-${key}`);
+      if (approveBtn) approveBtn.disabled = true;
+      if (rejectBtn)  { rejectBtn.disabled = true; rejectBtn.textContent = "Removing…"; }
+
+      try {
+        await remove(ref(db, `/pending_messages/${key}`));
+        showToast("Message rejected and removed.", "error");
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to remove message. Try again.", "error");
+        if (approveBtn) approveBtn.disabled = false;
+        if (rejectBtn)  { rejectBtn.disabled = false; rejectBtn.textContent = "✕ Reject"; }
+      }
+    };
+
+    // ── REMOVE APPROVED ──
+    window.removeApproved = async function(key) {
+      if (!confirm("Remove this message from the tribute wall?")) return;
+      try {
+        await remove(ref(db, `/approved_messages/${key}`));
+        showToast("Message removed from the wall.", "error");
+      } catch (err) {
+        showToast("Failed to remove. Try again.", "error");
+      }
+    };
+  </script>
+
+  <!-- UI JS -->
+  <script>
+    /* ── ADMIN PASSWORD ── */
+    const ADMIN_PASS = "matapat2025"; // Change this to your desired password
+
+    function checkPassword() {
+      const val = document.getElementById("admin-password").value;
+      if (val === ADMIN_PASS) {
+        document.getElementById("login-gate").style.display = "none";
+      } else {
+        const errEl = document.getElementById("login-error");
+        errEl.style.display = "block";
+        document.getElementById("admin-password").value = "";
+        setTimeout(() => { errEl.style.display = "none"; }, 3000);
+      }
+    }
+
+    // Allow pressing Enter on password field
+    document.getElementById("admin-password").addEventListener("keydown", e => {
+      if (e.key === "Enter") checkPassword();
+    });
+
+    window.checkPassword = checkPassword;
+
+    /* ── TABS ── */
+    window.switchTab = function(tab, btn) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      document.getElementById("tab-pending").style.display  = tab === "pending"  ? "block" : "none";
+      document.getElementById("tab-approved").style.display = tab === "approved" ? "block" : "none";
+    };
+
+    /* ── TOAST ── */
+    window.showToast = function(msg, type = "success") {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span>${type === "success" ? "✓" : "✕"}</span> ${msg}`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3800);
+    };
+
+    /* ── CURSOR ── */
+    const cur  = document.getElementById("cursor");
+    const ring = document.getElementById("cursor-ring");
+    document.addEventListener("mousemove", e => {
+      cur.style.left  = e.clientX + "px"; cur.style.top  = e.clientY + "px";
+      ring.style.left = e.clientX + "px"; ring.style.top = e.clientY + "px";
+    });
+
+    /* ── BG CANVAS ── */
+    (function() {
+      const c = document.getElementById("bg-canvas");
+      const ctx = c.getContext("2d");
+      const syms = ["∫","∑","π","√","∞","Δ","∂","x²","f(x)","θ","λ","≈","∈"];
+      const pts = [];
+      function resize() { c.width = window.innerWidth; c.height = window.innerHeight; }
+      window.addEventListener("resize", resize); resize();
+      for (let i = 0; i < 40; i++) {
+        pts.push({
+          x: Math.random() * c.width, y: Math.random() * c.height,
+          sym: syms[Math.floor(Math.random() * syms.length)],
+          sz: Math.random() * 12 + 7, sp: Math.random() * .2 + .06,
+          op: Math.random() * .4 + .1, drift: (Math.random() - .5) * .25,
+          ang: Math.random() * Math.PI * 2, spin: (Math.random() - .5) * .005
+        });
+      }
+      function draw() {
+        ctx.clearRect(0, 0, c.width, c.height);
+        pts.forEach(p => {
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.ang);
+          ctx.globalAlpha = p.op; ctx.fillStyle = "#3b82f6";
+          ctx.font = `${p.sz}px 'JetBrains Mono', monospace`;
+          ctx.textAlign = "center"; ctx.fillText(p.sym, 0, 0); ctx.restore();
+          p.y -= p.sp; p.x += p.drift; p.ang += p.spin;
+          if (p.y < -20) { p.y = c.height + 20; p.x = Math.random() * c.width; }
+          if (p.x < -20) p.x = c.width + 20;
+          if (p.x > c.width + 20) p.x = -20;
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+  </script>
+</body>
+</html>
