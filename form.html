@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leave a Message — Ma'am Cha Tribute</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #3b82f6;
+      --blue-dim:  #1d4ed8;
+      --cyan:      #67e8f9;
+      --navy:      #0a0f1e;
+      --navy-mid:  #0f172a;
+      --navy-card: #111827;
+      --navy-rim:  #1e293b;
+      --white:     #f8fafc;
+      --muted:     #94a3b8;
+      --glow:      rgba(59,130,246,.35);
+      --glow-c:    rgba(103,232,249,.25);
+      --success:   #34d399;
+      --error:     #f87171;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ── BG CANVAS ── */
+    #bg-canvas {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; opacity: .1; z-index: 0;
+    }
+
+    /* ── CURSOR ── */
+    .cursor { position:fixed; pointer-events:none; z-index:9999; width:10px; height:10px; border-radius:50%; background:var(--cyan); mix-blend-mode:screen; transform:translate(-50%,-50%); transition:transform .1s; }
+    .cursor-ring { position:fixed; pointer-events:none; z-index:9998; width:34px; height:34px; border-radius:50%; border:1.5px solid rgba(103,232,249,.5); transform:translate(-50%,-50%); transition:transform .25s cubic-bezier(.23,1,.32,1); }
+
+    /* ── NAV ── */
+    nav {
+      position: relative; z-index: 10;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.3rem 2.5rem;
+      border-bottom: 1px solid rgba(59,130,246,.1);
+      background: rgba(10,15,30,.8);
+      backdrop-filter: blur(18px);
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; color: var(--cyan); letter-spacing: .08em;
+      text-decoration: none;
+    }
+    .nav-back {
+      display: flex; align-items: center; gap: .5rem;
+      color: var(--muted); text-decoration: none;
+      font-size: .82rem; letter-spacing: .06em; text-transform: uppercase;
+      transition: color .3s;
+    }
+    .nav-back:hover { color: var(--white); }
+
+    /* ── MAIN ── */
+    main {
+      position: relative; z-index: 1;
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 4rem 1.5rem 6rem;
+    }
+
+    /* ── CARD SHELL ── */
+    .form-card {
+      width: 100%; max-width: 640px;
+      background: var(--navy-card);
+      border: 1px solid rgba(59,130,246,.15);
+      border-radius: 28px;
+      padding: 3.2rem 3rem;
+      box-shadow: 0 40px 100px rgba(0,0,0,.5), 0 0 60px rgba(59,130,246,.08);
+      position: relative; overflow: hidden;
+      animation: slideUp .8s cubic-bezier(.23,1,.32,1) both;
+    }
+    .form-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(to right, var(--blue-dim), var(--cyan), var(--blue));
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform: translateY(50px) scale(.97); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── HEADER ── */
+    .form-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--cyan); margin-bottom: 1rem;
+    }
+    .form-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 300; line-height: 1.2;
+      margin-bottom: .8rem;
+    }
+    .form-desc {
+      color: var(--muted); font-size: .9rem; line-height: 1.75;
+      margin-bottom: 2.4rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    /* ── FIELDS ── */
+    .field { margin-bottom: 1.6rem; }
+    label {
+      display: block; margin-bottom: .55rem;
+      font-size: .8rem; letter-spacing: .07em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    label span { color: var(--error); margin-left: .15rem; }
+
+    input, textarea {
+      width: 100%;
+      background: rgba(15,23,42,.7);
+      border: 1px solid rgba(59,130,246,.18);
+      border-radius: 14px;
+      padding: .9rem 1.1rem;
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem; font-weight: 300;
+      line-height: 1.6;
+      outline: none;
+      transition: border-color .3s, box-shadow .3s, background .3s;
+      resize: none;
+    }
+    input::placeholder, textarea::placeholder { color: rgba(148,163,184,.45); }
+    input:focus, textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.15), 0 0 20px var(--glow);
+      background: rgba(15,23,42,.95);
+    }
+    textarea { min-height: 180px; }
+
+    /* Char counter */
+    .field-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: .5rem;
+    }
+    .field-hint { font-size: .76rem; color: rgba(148,163,184,.5); }
+    .char-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem; color: var(--muted);
+      transition: color .3s;
+    }
+    .char-count.warn { color: var(--error); }
+
+    /* ── SUBMIT BTN ── */
+    .submit-btn {
+      width: 100%; margin-top: .6rem;
+      padding: 1rem;
+      border: none; border-radius: 14px; cursor: pointer;
+      background: linear-gradient(135deg, var(--blue), var(--blue-dim));
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem; font-weight: 500; letter-spacing: .04em;
+      box-shadow: 0 0 30px var(--glow), 0 4px 20px rgba(0,0,0,.4);
+      transition: box-shadow .35s, transform .25s, opacity .25s;
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; gap: .6rem;
+    }
+    .submit-btn:hover:not(:disabled) {
+      box-shadow: 0 0 55px rgba(59,130,246,.6), 0 6px 28px rgba(0,0,0,.5);
+      transform: translateY(-2px);
+    }
+    .submit-btn:disabled { opacity: .6; cursor: not-allowed; }
+    .submit-btn .ripple {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,.25);
+      transform: scale(0); animation: rippleAnim .6s linear;
+      pointer-events: none;
+    }
+    @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+
+    /* ── SPINNER ── */
+    .spinner {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── NOTICE ── */
+    .notice {
+      margin-top: 1.5rem; padding: 1rem 1.2rem;
+      border-radius: 12px; font-size: .88rem; line-height: 1.6;
+      display: none;
+    }
+    .notice.success {
+      background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.3);
+      color: var(--success); display: flex; align-items: flex-start; gap: .7rem;
+    }
+    .notice.error {
+      background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3);
+      color: var(--error); display: flex; align-items: flex-start; gap: .7rem;
+    }
+    .notice-icon { font-size: 1.2rem; flex-shrink: 0; }
+
+    /* ── REVIEW NOTE ── */
+    .review-note {
+      margin-top: 1.8rem; text-align: center;
+      font-size: .8rem; color: rgba(148,163,184,.6);
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+    }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      display: inline-flex; align-items: center; gap: .5rem;
+      margin-top: 2rem;
+      color: var(--muted); text-decoration: none; font-size: .85rem;
+      transition: color .3s;
+    }
+    .back-link:hover { color: var(--cyan); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid rgba(59,130,246,.08);
+      text-align: center; padding: 1.5rem 2rem;
+      font-size: .72rem; color: rgba(148,163,184,.4); letter-spacing: .05em;
+    }
+
+    /* ── SUCCESS SCREEN ── */
+    #success-screen {
+      display: none; text-align: center; padding: 3rem 2rem;
+    }
+    .success-anim {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, rgba(52,211,153,.2), rgba(52,211,153,.06));
+      border: 1.5px solid rgba(52,211,153,.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem; margin: 0 auto 1.6rem;
+      animation: popIn .5s cubic-bezier(.23,1,.32,1) both;
+    }
+    @keyframes popIn {
+      from { transform: scale(.5); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .success-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem; font-weight: 300; margin-bottom: .8rem;
+    }
+    .success-msg { color: var(--muted); font-size: .92rem; line-height: 1.8; margin-bottom: 2rem; }
+
+    @media (max-width: 600px) {
+      .form-card { padding: 2.2rem 1.5rem; border-radius: 22px; }
+      nav { padding: 1rem 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+  <canvas id="bg-canvas"></canvas>
+
+  <nav>
+    <a href="index.html" class="nav-logo">Ma'am Cha 💙</a>
+    <a href="index.html" class="nav-back">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      Back to Tribute
+    </a>
+  </nav>
+
+  <main>
+    <div class="form-card" id="form-card">
+
+      <!-- Default form view -->
+      <div id="form-view">
+        <p class="form-eyebrow">Leave a Message</p>
+        <h1 class="form-title">Share Your Heart,<br/>Grade 7 💙</h1>
+        <p class="form-desc">
+          Write something meaningful for Ma'am Cha. Your message will be reviewed before it's shown on the tribute wall — only kind, sincere messages are displayed.
+        </p>
+
+        <div class="field">
+          <label for="name">Your Name <span title="optional">(optional)</span></label>
+          <input type="text" id="name" placeholder="e.g. Juan dela Cruz" maxlength="80" autocomplete="off"/>
+        </div>
+
+        <div class="field">
+          <label for="message">Your Message <span>*</span></label>
+          <textarea id="message" placeholder="Dear Ma'am Cha, I just wanted to say..." maxlength="800"></textarea>
+          <div class="field-meta">
+            <span class="field-hint">Minimum 10 characters</span>
+            <span class="char-count" id="char-count">0 / 800</span>
+          </div>
+        </div>
+
+        <button class="submit-btn" id="submit-btn" onclick="handleSubmit(event)">
+          <span id="btn-text">Send My Message 💙</span>
+          <div class="spinner" id="spinner"></div>
+        </button>
+
+        <div class="notice" id="notice-el"></div>
+
+        <p class="review-note">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          All messages are reviewed before being displayed
+        </p>
+      </div>
+
+      <!-- Success view -->
+      <div id="success-screen">
+        <div class="success-anim">✓</div>
+        <h2 class="success-title">Message Sent! 💙</h2>
+        <p class="success-msg">
+          Thank you for sharing your heart. Your message has been submitted and will appear on the tribute wall once reviewed.<br/>
+          Ma'am Cha is going to love reading this.
+        </p>
+        <a href="index.html" class="submit-btn" style="text-decoration:none;max-width:260px;margin:0 auto;">
+          ← Back to Tribute
+        </a>
+        <br/>
+        <a href="form.html" class="back-link" onclick="resetForm()">Send Another Message</a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>Made with love, Athan 💙 &nbsp;·&nbsp; Grade 7 – Matapat</footer>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getDatabase, ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAYpXaL6oNhuX3LWAinx7LmhrAozfVzCvk",
+      authDomain: "dr-de-roda-lr-portal.firebaseapp.com",
+      databaseURL: "https://dr-de-roda-lr-portal-default-rtdb.firebaseio.com",
+      projectId: "dr-de-roda-lr-portal",
+      storageBucket: "dr-de-roda-lr-portal.firebasestorage.app",
+      messagingSenderId: "1074205661200",
+      appId: "1:1074205661200:web:f42d20c85f8600728cd295"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getDatabase(app);
+
+    window._submitMessage = async function(name, message) {
+      const pendingRef = ref(db, "/pending_messages");
+      await push(pendingRef, {
+        name:      name || "Anonymous",
+        message:   message,
+        timestamp: Date.now(),
+        approved:  false
+      });
+    };
+  </script>
+
+  <!-- UI JS -->
+  <script>
+    /* ── CURSOR ── */
+    const cur = document.getElementById("cursor");
+    const ring = document.getElementById("cursor-ring");
+    document.addEventListener("mousemove", e => {
+      cur.style.left  = e.clientX+"px"; cur.style.top  = e.clientY+"px";
+      ring.style.left = e.clientX+"px"; ring.style.top = e.clientY+"px";
+    });
+
+    /* ── BG CANVAS ── */
+    (function(){
+      const c = document.getElementById("bg-canvas");
+      const ctx = c.getContext("2d");
+      const syms = ["∫","∑","π","√","∞","÷","×","Δ","∂","x²","f(x)","dy/dx","θ","λ"];
+      const pts = [];
+      function resize(){ c.width = window.innerWidth; c.height = window.innerHeight; }
+      window.addEventListener("resize", resize); resize();
+      for(let i=0;i<45;i++){
+        pts.push({x:Math.random()*c.width, y:Math.random()*c.height,
+          sym:syms[Math.floor(Math.random()*syms.length)],
+          sz:Math.random()*14+8, sp:Math.random()*.25+.08,
+          op:Math.random()*.5+.15, drift:(Math.random()-.5)*.3,
+          ang:Math.random()*Math.PI*2, spin:(Math.random()-.5)*.006});
+      }
+      function draw(){
+        ctx.clearRect(0,0,c.width,c.height);
+        pts.forEach(p=>{
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.ang);
+          ctx.globalAlpha=p.op; ctx.fillStyle="#3b82f6";
+          ctx.font=`${p.sz}px 'JetBrains Mono',monospace`;
+          ctx.textAlign="center"; ctx.fillText(p.sym,0,0); ctx.restore();
+          p.y-=p.sp; p.x+=p.drift; p.ang+=p.spin;
+          if(p.y<-20){p.y=c.height+20;p.x=Math.random()*c.width;}
+          if(p.x<-20)p.x=c.width+20; if(p.x>c.width+20)p.x=-20;
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    /* ── CHAR COUNTER ── */
+    const msgEl = document.getElementById("message");
+    const countEl = document.getElementById("char-count");
+    msgEl.addEventListener("input", () => {
+      const n = msgEl.value.length;
+      countEl.textContent = `${n} / 800`;
+      countEl.classList.toggle("warn", n > 750);
+    });
+
+    /* ── RIPPLE ── */
+    function addRipple(btn, e) {
+      const r = document.createElement("span");
+      r.className = "ripple";
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+      btn.appendChild(r);
+      setTimeout(()=>r.remove(), 700);
+    }
+
+    /* ── NOTICE ── */
+    function showNotice(type, msg) {
+      const el = document.getElementById("notice-el");
+      el.className = "notice " + type;
+      el.innerHTML = `<span class="notice-icon">${type==="success"?"✓":"✕"}</span><span>${msg}</span>`;
+      el.style.display = "flex";
+      el.scrollIntoView({behavior:"smooth", block:"nearest"});
+    }
+    function hideNotice() {
+      const el = document.getElementById("notice-el");
+      el.style.display = "none";
+    }
+
+    /* ── SUBMIT ── */
+    async function handleSubmit(e) {
+      addRipple(document.getElementById("submit-btn"), e);
+      const name    = document.getElementById("name").value.trim();
+      const message = document.getElementById("message").value.trim();
+
+      hideNotice();
+
+      if (message.length < 10) {
+        showNotice("error", "Your message needs to be at least 10 characters long. Pour your heart into it 💙");
+        return;
+      }
+
+      const btn = document.getElementById("submit-btn");
+      const btnText = document.getElementById("btn-text");
+      const spinner = document.getElementById("spinner");
+
+      btn.disabled = true;
+      btnText.textContent = "Sending...";
+      spinner.style.display = "block";
+
+      try {
+        if (typeof window._submitMessage === "function") {
+          await window._submitMessage(name, message);
+        } else {
+          // Firebase might still be loading — wait a moment
+          await new Promise(res => setTimeout(res, 1200));
+          if (typeof window._submitMessage === "function") {
+            await window._submitMessage(name, message);
+          } else {
+            throw new Error("Firebase not ready");
+          }
+        }
+        // Show success screen
+        document.getElementById("form-view").style.display = "none";
+        document.getElementById("success-screen").style.display = "block";
+      } catch (err) {
+        console.error(err);
+        showNotice("error", "Something went wrong. Please check your connection and try again.");
+        btn.disabled = false;
+        btnText.textContent = "Send My Message 💙";
+        spinner.style.display = "none";
+      }
+    }
+
+    function resetForm() {
+      document.getElementById("form-view").style.display = "block";
+      document.getElementById("success-screen").style.display = "none";
+      document.getElementById("name").value = "";
+      document.getElementById("message").value = "";
+      countEl.textContent = "0 / 800";
+      document.getElementById("submit-btn").disabled = false;
+      document.getElementById("btn-text").textContent = "Send My Message 💙";
+      document.getElementById("spinner").style.display = "none";
+      hideNotice();
+    }
+
+    window.handleSubmit = handleSubmit;
+    window.resetForm = resetForm;
+  </script>
+</body>
+</html>
