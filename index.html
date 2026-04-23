@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Thank You, Ma'am Cha 💙 — Grade 7 Matapat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #3b82f6;
+      --blue-dim:  #1d4ed8;
+      --cyan:      #67e8f9;
+      --navy:      #0a0f1e;
+      --navy-mid:  #0f172a;
+      --navy-card: #111827;
+      --navy-rim:  #1e293b;
+      --white:     #f8fafc;
+      --muted:     #94a3b8;
+      --glow:      rgba(59,130,246,.35);
+      --glow-c:    rgba(103,232,249,.25);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      line-height: 1.7;
+    }
+
+    /* ─── CURSOR ─── */
+    .cursor {
+      position: fixed; pointer-events: none; z-index: 9999;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--cyan); mix-blend-mode: screen;
+      transform: translate(-50%,-50%);
+      transition: transform .1s, opacity .3s;
+    }
+    .cursor-ring {
+      position: fixed; pointer-events: none; z-index: 9998;
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 1.5px solid rgba(103,232,249,.5);
+      transform: translate(-50%,-50%);
+      transition: transform .25s cubic-bezier(.23,1,.32,1), opacity .3s;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.2rem 2.5rem;
+      background: rgba(10,15,30,.7);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(59,130,246,.12);
+      transition: background .4s;
+    }
+    .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; color: var(--cyan); letter-spacing: .08em; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: .82rem;
+      letter-spacing: .06em; text-transform: uppercase;
+      transition: color .3s;
+    }
+    .nav-links a:hover { color: var(--white); }
+
+    /* ─── HERO ─── */
+    #hero {
+      position: relative; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 8rem 2rem 5rem;
+      overflow: hidden;
+    }
+
+    /* Canvas for math bg */
+    #math-canvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      opacity: .18; pointer-events: none;
+    }
+
+    /* Radial glow behind title */
+    .hero-glow {
+      position: absolute; width: 640px; height: 640px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,.22) 0%, transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      animation: pulse-glow 5s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%,100% { opacity: .7; transform: translate(-50%,-50%) scale(1); }
+      50% { opacity: 1; transform: translate(-50%,-50%) scale(1.12); }
+    }
+
+    .hero-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--cyan); margin-bottom: 1.4rem;
+      opacity: 0; animation: fadeUp .8s .2s forwards;
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.2rem, 8vw, 7rem);
+      font-weight: 300; line-height: 1.08;
+      letter-spacing: -.02em;
+      background: linear-gradient(135deg, #fff 0%, var(--cyan) 55%, var(--blue) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0; animation: fadeUp .9s .4s forwards;
+    }
+    .hero-sub {
+      margin-top: .8rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      font-style: italic; color: var(--muted);
+      opacity: 0; animation: fadeUp .9s .6s forwards;
+    }
+    .hero-line {
+      margin-top: 1.6rem; color: rgba(248,250,252,.55);
+      font-size: clamp(.85rem, 1.8vw, 1rem);
+      opacity: 0; animation: fadeUp .9s .8s forwards;
+    }
+    .hero-cta {
+      margin-top: 2.8rem;
+      display: inline-flex; align-items: center; gap: .65rem;
+      padding: .85rem 2.2rem;
+      border-radius: 50px;
+      background: linear-gradient(135deg, var(--blue), var(--blue-dim));
+      color: #fff; text-decoration: none;
+      font-size: .9rem; font-weight: 500; letter-spacing: .04em;
+      box-shadow: 0 0 30px var(--glow), 0 4px 20px rgba(0,0,0,.4);
+      transition: box-shadow .35s, transform .25s;
+      opacity: 0; animation: fadeUp .9s 1s forwards;
+    }
+    .hero-cta:hover {
+      box-shadow: 0 0 55px rgba(59,130,246,.6), 0 6px 28px rgba(0,0,0,.5);
+      transform: translateY(-3px) scale(1.03);
+    }
+    .hero-scroll-hint {
+      position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: .5rem;
+      color: var(--muted); font-size: .72rem; letter-spacing: .14em;
+      opacity: 0; animation: fadeIn 1s 1.6s forwards;
+    }
+    .scroll-line {
+      width: 1px; height: 48px;
+      background: linear-gradient(to bottom, var(--cyan), transparent);
+      animation: scrollDrop 1.8s 1.8s ease-in-out infinite;
+    }
+    @keyframes scrollDrop {
+      0%,100% { transform: scaleY(1); opacity: .5; }
+      50% { transform: scaleY(1.3); opacity: 1; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+
+    /* ─── SECTION SHELL ─── */
+    section { padding: 7rem 2rem; }
+    .section-inner { max-width: 1200px; margin: 0 auto; }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .7rem; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--cyan); margin-bottom: .9rem;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4.5vw, 3.5rem);
+      font-weight: 300; line-height: 1.15;
+      margin-bottom: 1.2rem;
+    }
+    .section-desc {
+      color: var(--muted); max-width: 560px;
+      font-size: clamp(.9rem, 1.6vw, 1rem);
+      line-height: 1.8;
+    }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      width: 100%; height: 1px;
+      background: linear-gradient(to right, transparent, var(--blue), transparent);
+      opacity: .3; margin: 0 auto;
+    }
+
+    /* ─── MESSAGE WALL ─── */
+    #messages { background: var(--navy-mid); }
+    .msg-header { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; }
+    .msg-notice {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .5rem 1.1rem; border-radius: 50px;
+      border: 1px solid rgba(103,232,249,.2);
+      background: rgba(103,232,249,.05);
+      font-size: .78rem; color: var(--cyan); letter-spacing: .04em;
+    }
+    .msg-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.4rem;
+    }
+
+    /* Skeleton */
+    .skeleton-card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-rim);
+      border-radius: 18px; padding: 1.6rem;
+      animation: shimmer 1.6s infinite;
+    }
+    .sk-line {
+      height: 10px; border-radius: 6px;
+      background: linear-gradient(90deg, #1e293b 25%, #2d3f55 50%, #1e293b 75%);
+      background-size: 200% 100%;
+      animation: shimmer-line 1.6s infinite;
+      margin-bottom: .8rem;
+    }
+    .sk-line.short { width: 55%; }
+    .sk-line.xshort { width: 30%; }
+    @keyframes shimmer-line {
+      from { background-position: 200% 0; }
+      to   { background-position: -200% 0; }
+    }
+
+    /* Real cards */
+    .msg-card {
+      background: var(--navy-card);
+      border: 1px solid rgba(59,130,246,.12);
+      border-radius: 18px; padding: 1.7rem 1.6rem;
+      position: relative; overflow: hidden;
+      cursor: default;
+      transition: transform .35s cubic-bezier(.23,1,.32,1), box-shadow .35s, border-color .35s;
+      opacity: 0; transform: translateY(24px);
+      animation: cardIn .6s ease forwards;
+    }
+    .msg-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(59,130,246,.06) 0%, transparent 60%);
+      opacity: 0; transition: opacity .35s;
+    }
+    .msg-card:hover {
+      transform: translateY(-6px) rotate(.4deg);
+      box-shadow: 0 16px 48px rgba(0,0,0,.5), 0 0 28px var(--glow);
+      border-color: rgba(59,130,246,.38);
+    }
+    .msg-card:hover::before { opacity: 1; }
+
+    .msg-quote-mark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 4.5rem; line-height: .7;
+      color: var(--blue); opacity: .25;
+      margin-bottom: .4rem; display: block;
+    }
+    .msg-text {
+      font-size: .95rem; line-height: 1.75; color: rgba(248,250,252,.85);
+      font-style: italic;
+    }
+    .msg-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 1.2rem; padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .msg-name { font-size: .78rem; color: var(--cyan); font-weight: 500; letter-spacing: .04em; }
+    .msg-date { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--muted); }
+    @keyframes cardIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── CAROUSEL ─── */
+    #memories { background: var(--navy); overflow: hidden; }
+    .carousel-wrap { position: relative; margin-top: 3rem; overflow: hidden; border-radius: 20px; }
+    .carousel-track {
+      display: flex; transition: transform .8s cubic-bezier(.77,0,.175,1);
+    }
+    .carousel-slide {
+      min-width: 100%; position: relative; overflow: hidden; border-radius: 20px;
+    }
+    .carousel-slide img {
+      width: 100%; height: clamp(280px, 50vw, 520px);
+      object-fit: cover; display: block;
+      transition: transform .6s ease;
+    }
+    .carousel-slide:hover img { transform: scale(1.03); }
+    .carousel-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 2.5rem 2rem 1.6rem;
+      background: linear-gradient(to top, rgba(10,15,30,.85) 0%, transparent 100%);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; font-style: italic; color: rgba(248,250,252,.9);
+    }
+
+    /* multi-view on md+ */
+    @media (min-width: 768px) {
+      .carousel-slide { min-width: 50%; }
+    }
+    @media (min-width: 1100px) {
+      .carousel-slide { min-width: 33.333%; }
+    }
+
+    .carousel-dots {
+      display: flex; justify-content: center; gap: .55rem; margin-top: 1.6rem;
+    }
+    .carousel-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--navy-rim); border: 1px solid var(--navy-rim);
+      cursor: pointer; transition: background .3s, transform .3s;
+    }
+    .carousel-dot.active { background: var(--cyan); transform: scale(1.4); }
+
+    .carousel-nav {
+      display: flex; justify-content: center; gap: 1rem; margin-top: 1.2rem;
+    }
+    .carousel-btn {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 1px solid rgba(103,232,249,.3);
+      background: rgba(103,232,249,.06);
+      color: var(--cyan); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .3s, border-color .3s;
+      font-size: 1.1rem;
+    }
+    .carousel-btn:hover { background: rgba(103,232,249,.15); border-color: var(--cyan); }
+
+    /* ─── LESSONS ─── */
+    #lessons { background: var(--navy-mid); }
+    .lessons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.5rem; margin-top: 3rem;
+    }
+    .lesson-card {
+      background: var(--navy-card);
+      border: 1px solid rgba(59,130,246,.1);
+      border-radius: 20px; padding: 2rem 1.6rem;
+      text-align: center;
+      transition: transform .35s, box-shadow .35s, border-color .35s;
+    }
+    .lesson-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0,0,0,.45), 0 0 30px var(--glow);
+      border-color: rgba(59,130,246,.35);
+    }
+    .lesson-icon {
+      width: 56px; height: 56px; border-radius: 16px;
+      background: linear-gradient(135deg, rgba(59,130,246,.22), rgba(103,232,249,.12));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; margin: 0 auto 1.2rem;
+      box-shadow: 0 0 18px var(--glow-c);
+    }
+    .lesson-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem; margin-bottom: .5rem;
+    }
+    .lesson-desc { font-size: .84rem; color: var(--muted); line-height: 1.65; }
+
+    /* ─── MATH TRIBUTE ─── */
+    #math-tribute {
+      position: relative; background: var(--navy); overflow: hidden;
+      text-align: center;
+    }
+    #chalk-canvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      opacity: .12; pointer-events: none;
+    }
+    .chalk-board {
+      position: relative; z-index: 1;
+      display: inline-block;
+      padding: 3.5rem 4rem;
+      border: 1.5px solid rgba(248,250,252,.1);
+      border-radius: 24px;
+      background: rgba(15,23,42,.7);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 0 60px rgba(59,130,246,.18), inset 0 0 40px rgba(0,0,0,.3);
+      margin-top: 3rem;
+    }
+    .chalk-formula {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+      letter-spacing: .02em; line-height: 1.5;
+      color: var(--white);
+      text-shadow: 0 0 24px var(--glow), 0 0 60px rgba(103,232,249,.3);
+    }
+    .chalk-formula sup { font-size: .65em; color: var(--cyan); }
+    .chalk-underline {
+      width: 80%; height: 1.5px; margin: 1.2rem auto 0;
+      background: linear-gradient(to right, transparent, rgba(103,232,249,.5), transparent);
+    }
+    .chalk-note {
+      margin-top: 1rem; font-style: italic;
+      color: var(--muted); font-size: .9rem;
+    }
+
+    /* ─── FINAL ─── */
+    #final {
+      background: radial-gradient(ellipse at center, rgba(29,78,216,.12) 0%, var(--navy) 70%);
+      text-align: center; padding: 9rem 2rem;
+    }
+    .final-heart {
+      font-size: 3rem; display: block;
+      animation: heartBeat 2.4s ease-in-out infinite;
+      margin-bottom: 1.5rem;
+    }
+    @keyframes heartBeat {
+      0%,100% { transform: scale(1); }
+      14%     { transform: scale(1.18); }
+      28%     { transform: scale(1); }
+      42%     { transform: scale(1.12); }
+      70%     { transform: scale(1); }
+    }
+    .final-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 3.8rem); font-weight: 300;
+      line-height: 1.2; margin-bottom: 1.4rem;
+    }
+    .final-message {
+      max-width: 600px; margin: 0 auto 2.5rem;
+      color: var(--muted); font-size: clamp(.9rem,1.6vw,1.05rem); line-height: 1.9;
+    }
+    .final-class {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; font-style: italic; color: var(--cyan);
+      margin-bottom: 3rem;
+    }
+    .final-sig {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .8rem; letter-spacing: .14em; color: var(--muted);
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding-top: 1.2rem; margin-top: 1rem;
+    }
+    .final-sig span { color: var(--cyan); }
+
+    /* ─── SCROLL ANIMATIONS ─── */
+    .reveal {
+      opacity: 0; transform: translateY(32px);
+      transition: opacity .75s ease, transform .75s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--navy-mid);
+      border-top: 1px solid rgba(59,130,246,.1);
+      text-align: center; padding: 1.8rem 2rem;
+      font-size: .75rem; color: var(--muted); letter-spacing: .05em;
+    }
+
+    /* ─── MOBILE ─── */
+    @media (max-width: 640px) {
+      nav { padding: 1rem 1.4rem; }
+      .nav-links { display: none; }
+      section { padding: 5rem 1.2rem; }
+      .chalk-board { padding: 2rem 1.4rem; }
+      .msg-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-logo">Ma'am Cha</div>
+    <ul class="nav-links">
+      <li><a href="#messages">Messages</a></li>
+      <li><a href="#memories">Memories</a></li>
+      <li><a href="#lessons">Lessons</a></li>
+      <li><a href="#math-tribute">Tribute</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section id="hero">
+    <canvas id="math-canvas"></canvas>
+    <div class="hero-glow"></div>
+    <p class="hero-eyebrow">Grade 7 – Matapat · A Digital Tribute</p>
+    <h1 class="hero-title">Thank You,<br/>Ma'am Cha 💙</h1>
+    <p class="hero-sub">From Grade 7 – Matapat</p>
+    <p class="hero-line">For teaching us more than just mathematics</p>
+    <a href="#messages" class="hero-cta">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Read Our Messages
+    </a>
+    <div class="hero-scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Message Wall -->
+  <section id="messages">
+    <div class="section-inner">
+      <div class="msg-header reveal">
+        <div>
+          <p class="section-label">Student Voices</p>
+          <h2 class="section-title">Words from the Heart</h2>
+          <p class="section-desc">Every student had something to say — something they carried from your classroom into the rest of their lives.</p>
+        </div>
+        <div>
+          <p class="msg-notice">💙 All messages are reviewed before being displayed</p>
+        </div>
+      </div>
+      <div class="msg-grid" id="msg-grid">
+        <!-- Skeletons -->
+        <div class="skeleton-card"><div class="sk-line"></div><div class="sk-line"></div><div class="sk-line short"></div></div>
+        <div class="skeleton-card"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line"></div></div>
+        <div class="skeleton-card"><div class="sk-line"></div><div class="sk-line"></div><div class="sk-line xshort"></div></div>
+        <div class="skeleton-card"><div class="sk-line short"></div><div class="sk-line"></div><div class="sk-line"></div></div>
+        <div class="skeleton-card"><div class="sk-line"></div><div class="sk-line xshort"></div><div class="sk-line"></div></div>
+        <div class="skeleton-card"><div class="sk-line"></div><div class="sk-line"></div><div class="sk-line short"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Carousel / Memories -->
+  <section id="memories">
+    <div class="section-inner">
+      <div class="reveal">
+        <p class="section-label">Memories</p>
+        <h2 class="section-title">Moments We'll Always Keep</h2>
+        <p class="section-desc">Snapshots of the time we spent together — in and out of the classroom.</p>
+      </div>
+      <div class="carousel-wrap reveal">
+        <div class="carousel-track" id="carousel-track">
+          <!-- Slides injected by JS -->
+        </div>
+      </div>
+      <div class="carousel-nav">
+        <button class="carousel-btn" id="prev-btn" aria-label="Previous">&#8592;</button>
+        <div class="carousel-dots" id="carousel-dots"></div>
+        <button class="carousel-btn" id="next-btn" aria-label="Next">&#8594;</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- What You Taught Us -->
+  <section id="lessons">
+    <div class="section-inner">
+      <div class="reveal">
+        <p class="section-label">What You Taught Us</p>
+        <h2 class="section-title">Beyond the Equations</h2>
+        <p class="section-desc">The most valuable lessons didn't come from the textbook — they came from you.</p>
+      </div>
+      <div class="lessons-grid">
+        <div class="lesson-card reveal">
+          <div class="lesson-icon">🧘</div>
+          <h3 class="lesson-title">Patience</h3>
+          <p class="lesson-desc">You never gave up on a single student. You explained things again and again until every one of us understood.</p>
+        </div>
+        <div class="lesson-card reveal">
+          <div class="lesson-icon">🔍</div>
+          <h3 class="lesson-title">Critical Thinking</h3>
+          <p class="lesson-desc">You taught us to question, to investigate, and to never settle for "I don't know" as a final answer.</p>
+        </div>
+        <div class="lesson-card reveal">
+          <div class="lesson-icon">💪</div>
+          <h3 class="lesson-title">Confidence</h3>
+          <p class="lesson-desc">You believed in us before we believed in ourselves — and that made all the difference.</p>
+        </div>
+        <div class="lesson-card reveal">
+          <div class="lesson-icon">🧩</div>
+          <h3 class="lesson-title">Problem Solving</h3>
+          <p class="lesson-desc">You showed us that every problem has a solution — you just have to be willing to sit with it long enough.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Math Tribute -->
+  <section id="math-tribute">
+    <canvas id="chalk-canvas"></canvas>
+    <div class="section-inner" style="text-align:center;">
+      <div class="reveal">
+        <p class="section-label">The Formula</p>
+        <h2 class="section-title">A Mathematician's Tribute</h2>
+      </div>
+      <div class="chalk-board reveal">
+        <p class="chalk-formula">
+          Great Teacher = Knowledge + Patience + Passion<sup>∞</sup>
+        </p>
+        <div class="chalk-underline"></div>
+        <p class="chalk-note">A formula proven by Ma'am Cha, every single day.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Final -->
+  <section id="final">
+    <div class="section-inner">
+      <span class="final-heart reveal">💙</span>
+      <h2 class="final-title reveal">Until We Meet Again,<br/>Ma'am Cha</h2>
+      <p class="final-message reveal">
+        You walked into our lives as a teacher and left as someone we will remember for the rest of ours.
+        Every lesson, every smile, every moment of patience — it meant more than words can hold.
+        Thank you for being exactly who you are, and for showing us who we can become.
+      </p>
+      <p class="final-class reveal">With all our love, Grade 7 – Matapat 💙</p>
+
+      <div class="final-sig reveal">Made with love, <span>Athan</span> 💙</div>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2025 Grade 7 – Matapat &nbsp;·&nbsp; A tribute for Ma'am Cha &nbsp;·&nbsp; Made with love, Athan 💙
+  </footer>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAYpXaL6oNhuX3LWAinx7LmhrAozfVzCvk",
+      authDomain: "dr-de-roda-lr-portal.firebaseapp.com",
+      databaseURL: "https://dr-de-roda-lr-portal-default-rtdb.firebaseio.com",
+      projectId: "dr-de-roda-lr-portal",
+      storageBucket: "dr-de-roda-lr-portal.firebasestorage.app",
+      messagingSenderId: "1074205661200",
+      appId: "1:1074205661200:web:f42d20c85f8600728cd295"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getDatabase(app);
+    const grid = document.getElementById("msg-grid");
+
+    onValue(ref(db, "/approved_messages"), (snap) => {
+      grid.innerHTML = "";
+      const data = snap.val();
+      if (!data) {
+        grid.innerHTML = `<p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:3rem 0;">No messages yet — be the first! 💙</p>`;
+        return;
+      }
+      const entries = Object.values(data).sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+      entries.forEach((entry, i) => {
+        const card = document.createElement("div");
+        card.className = "msg-card";
+        card.style.animationDelay = `${i * 80}ms`;
+        const date = entry.timestamp
+          ? new Date(entry.timestamp).toLocaleDateString("en-PH", {month:"short",day:"numeric",year:"numeric"})
+          : "";
+        card.innerHTML = `
+          <span class="msg-quote-mark">"</span>
+          <p class="msg-text">${escHtml(entry.message || entry.text || "")}</p>
+          <div class="msg-footer">
+            <span class="msg-name">${escHtml(entry.name || "Anonymous")}</span>
+            <span class="msg-date">${date}</span>
+          </div>`;
+        grid.appendChild(card);
+      });
+      initReveal(); // re-run reveal on new cards
+    });
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+  </script>
+
+  <!-- Main JS -->
+  <script>
+    /* ── CURSOR ── */
+    const cur = document.getElementById("cursor");
+    const ring = document.getElementById("cursor-ring");
+    document.addEventListener("mousemove", e => {
+      cur.style.left  = e.clientX + "px";
+      cur.style.top   = e.clientY + "px";
+      ring.style.left = e.clientX + "px";
+      ring.style.top  = e.clientY + "px";
+    });
+
+    /* ── MATH CANVAS (hero bg) ── */
+    (function() {
+      const canvas = document.getElementById("math-canvas");
+      const ctx = canvas.getContext("2d");
+      const symbols = ["∫","∑","π","√","∞","÷","×","≤","≥","≈","∂","Δ","∇","α","β","θ","λ","μ","σ","x²","y³","f(x)","dy/dx","∈","∅","⊕","≡","∝","∩","∪"];
+      const particles = [];
+      let W, H;
+
+      function resize() { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; }
+      window.addEventListener("resize", resize); resize();
+
+      for (let i=0; i<70; i++) {
+        particles.push({
+          x: Math.random()*W, y: Math.random()*H,
+          sym: symbols[Math.floor(Math.random()*symbols.length)],
+          size: Math.random()*18+10,
+          speed: Math.random()*.35+.1,
+          opacity: Math.random()*.6+.2,
+          drift: (Math.random()-.5)*.4,
+          angle: Math.random()*Math.PI*2,
+          spin: (Math.random()-.5)*.008,
+          tx: Math.random()*W, ty: Math.random()*H
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0,0,W,H);
+        particles.forEach(p => {
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.angle);
+          ctx.globalAlpha = p.opacity;
+          ctx.fillStyle = Math.random() > .5 ? "#3b82f6" : "#67e8f9";
+          ctx.font = `${p.size}px 'JetBrains Mono', monospace`;
+          ctx.textAlign = "center";
+          ctx.fillText(p.sym, 0, 0);
+          ctx.restore();
+          p.y -= p.speed;
+          p.x += p.drift;
+          p.angle += p.spin;
+          if (p.y < -30) { p.y = H+30; p.x = Math.random()*W; }
+          if (p.x < -30) p.x = W+30;
+          if (p.x > W+30) p.x = -30;
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    /* ── CHALK CANVAS (grid lines) ── */
+    (function() {
+      const canvas = document.getElementById("chalk-canvas");
+      const ctx = canvas.getContext("2d");
+      function resize() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        drawGrid();
+      }
+      function drawGrid() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.strokeStyle = "rgba(248,250,252,.4)";
+        ctx.lineWidth = .8;
+        const sp = 40;
+        for (let x=0; x<canvas.width; x+=sp) {
+          ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
+        }
+        for (let y=0; y<canvas.height; y+=sp) {
+          ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
+        }
+      }
+      window.addEventListener("resize", resize); resize();
+    })();
+
+    /* ── CAROUSEL ── */
+    (function() {
+      // Add your actual image filenames here
+      const images = [
+        { src: "1.jpg", caption: "A day we'll never forget 💙" },
+        { src: "2.jpg", caption: "Learning together, growing together" },
+        { src: "3.jpg", caption: "Ma'am Cha and her Matapat family" },
+        { src: "4.jpg", caption: "Inside the classroom where it all began" },
+        { src: "5.jpg", caption: "Moments that shaped who we are" },
+      ];
+
+      const track = document.getElementById("carousel-track");
+      const dotsEl = document.getElementById("carousel-dots");
+      let perView = window.innerWidth >= 1100 ? 3 : window.innerWidth >= 768 ? 2 : 1;
+      let current = 0;
+      let paused = false;
+      let interval;
+
+      // Build slides
+      images.forEach((img, i) => {
+        const slide = document.createElement("div");
+        slide.className = "carousel-slide";
+        slide.style.minWidth = (100/perView) + "%";
+        slide.innerHTML = `<img src="${img.src}" alt="Memory ${i+1}" loading="lazy"/>
+          <div class="carousel-caption">${img.caption}</div>`;
+        track.appendChild(slide);
+
+        const dot = document.createElement("button");
+        dot.className = "carousel-dot" + (i===0?" active":"");
+        dot.addEventListener("click", () => goTo(i));
+        dotsEl.appendChild(dot);
+      });
+
+      const maxIdx = images.length - perView;
+
+      function goTo(idx) {
+        current = Math.max(0, Math.min(idx, maxIdx));
+        track.style.transform = `translateX(-${current * (100/perView)}%)`;
+        document.querySelectorAll(".carousel-dot").forEach((d,i) => d.classList.toggle("active", i===current));
+      }
+      function next() { goTo(current >= maxIdx ? 0 : current + 1); }
+      function prev() { goTo(current <= 0 ? maxIdx : current - 1); }
+
+      document.getElementById("next-btn").addEventListener("click", () => { next(); resetInterval(); });
+      document.getElementById("prev-btn").addEventListener("click", () => { prev(); resetInterval(); });
+
+      function startInterval() { interval = setInterval(next, 4000); }
+      function resetInterval() { clearInterval(interval); startInterval(); }
+      startInterval();
+
+      const wrap = document.querySelector(".carousel-wrap");
+      wrap.addEventListener("mouseenter", () => clearInterval(interval));
+      wrap.addEventListener("mouseleave", () => { if (!paused) startInterval(); });
+
+      // Touch
+      let touchX = null;
+      wrap.addEventListener("touchstart", e => { touchX = e.touches[0].clientX; clearInterval(interval); }, {passive:true});
+      wrap.addEventListener("touchend", e => {
+        if (touchX === null) return;
+        const diff = touchX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) diff > 0 ? next() : prev();
+        touchX = null; startInterval();
+      }, {passive:true});
+
+      window.addEventListener("resize", () => {
+        perView = window.innerWidth >= 1100 ? 3 : window.innerWidth >= 768 ? 2 : 1;
+        track.querySelectorAll(".carousel-slide").forEach(s => s.style.minWidth = (100/perView)+"%");
+        goTo(0);
+      });
+    })();
+
+    /* ── SCROLL REVEAL ── */
+    function initReveal() {
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e, i) => {
+          if (e.isIntersecting) {
+            setTimeout(() => e.target.classList.add("visible"), i*80);
+            obs.unobserve(e.target);
+          }
+        });
+      }, { threshold: .12 });
+      document.querySelectorAll(".reveal:not(.visible)").forEach(el => obs.observe(el));
+    }
+    initReveal();
+
+    /* ── NAV SCROLL ── */
+    window.addEventListener("scroll", () => {
+      document.querySelector("nav").style.background =
+        window.scrollY > 60 ? "rgba(10,15,30,.95)" : "rgba(10,15,30,.7)";
+    });
+  </script>
+</body>
+</html>
